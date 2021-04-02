@@ -42,7 +42,7 @@ install() {
 	curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash
 	apt update
 	# install panel dependencies
-	apt -y install php8.0 php8.0-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis-server
+	apt -y install php8.0 php8.0-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis-server certbot python3-certbot-nginx
 	# get composer
 	curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
 	# get panel files
@@ -173,7 +173,7 @@ server {
     }
     location ~ \.php$ {
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.0-fpm.sock;
         fastcgi_index index.php;
         include fastcgi_params;
         fastcgi_param PHP_VALUE "upload_max_filesize = 100M \n post_max_size=100M";

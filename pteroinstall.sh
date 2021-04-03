@@ -4,7 +4,7 @@ output(){
     echo -e '\e[36m'$1'\e[0m';
 }
 
-version=v1.0
+version=v1.1
 
 importssh(){
 apt install -y ssh-import-id
@@ -27,6 +27,7 @@ installdaemon() {
 
     output "Add node on panel, server ip: $SERVER_IP"
     read choice
+    ${choice}
 
     output "Put daemon into systemd"
     cat > /etc/systemd/system/wings.service <<- 'EOF'
@@ -54,25 +55,6 @@ EOF
 
 installpanel() {
 
-	# email
-	output "Please enter the desired user email address:"
-    read email
-    # dns
-    output "Please enter your FQDN (panel.domain.tld):"
-    read FQDN
-    
-    output "Resolving DNS..."
-    SERVER_IP=$(curl -s http://checkip.amazonaws.com)
-    DOMAIN_RECORD=$(dig +short ${FQDN})
-    if [ "${SERVER_IP}" != "${DOMAIN_RECORD}" ]; then
-        output ""
-        output "The entered domain does not resolve to the primary public IP of this server."
-        output "Please make an A record pointing to your server's IP. For example, if you make an A record called 'panel' pointing to your server's IP, your FQDN is panel.domain.tld"
-        output "If you are using Cloudflare, please disable the orange cloud."
-    else 
-        output "Domain resolved correctly. Good to go..."
-    fi
-
 	# get apt repos
     output "Getting apt repos"
 	apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg
@@ -83,10 +65,10 @@ installpanel() {
 
     output "Installing panel dependencies"
 	# install panel dependencies
-	apt -y install php8.0 php8.0-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis-server certbot python3-certbot-nginx
+	apt -y install php8.0 php8.0-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis-server
 	# get composer
 	curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
-	
+
     output "Downloading panel files"
 	mkdir -p /var/www/pterodactyl
 	cd /var/www/pterodactyl
@@ -157,7 +139,6 @@ EOF
     output "Disabling default configuration..."
     rm -rf /etc/nginx/sites-enabled/default
     output "Configuring Nginx Webserver..."
-    certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
 
 echo '
 server_tokens off;
@@ -243,10 +224,55 @@ server {
     service nginx restart
 }
 
+ssl {
+  output "Please enter the desired user email address:"
+    read email
+    # dns
+    output "Please enter your FQDN (panel.domain.tld):"
+    read FQDN
+
+    output "Resolving DNS..."
+    SERVER_IP=$(curl -s http://checkip.amazonaws.com)
+    DOMAIN_RECORD=$(dig +short ${FQDN})
+    if [ "${SERVER_IP}" != "${DOMAIN_RECORD}" ]; then
+        output ""
+        output "The entered domain does not resolve to the primary public IP of this server."
+        output "Please make an A record pointing to your server's IP. For example, if you make an A record called 'panel' pointing to your server's IP, your FQDN is panel.domain.tld"
+        output "If you are using Cloudflare, please disable the orange cloud."
+    else
+        output "Domain resolved correctly. Good to go..."
+    fi
+
+    apt install certbot python3-certbot-nginx
+    service nginx stop
+    certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
+}
+
+choice {
+  output ""
+  output "What do you want to install:"
+  output "1: daemon & panel"
+  output "2: daemon"
+  read choice
+  case $choice in
+  	      1 ) output "You have selected to install panel and daemon"
+              ssl
+              installpanel
+              installdaemon
+              ;;
+          2 ) output "You have selected to install daemon"
+              ssl
+              output ""
+              installdaemon
+              ;;
+          * ) output "You did not enter a valid selection."
+              exit
+  esac
+}
 
 # begin
 
-output "Ferox ptero 1.0 installer version: $version"
+output "Ferox ptero 1.0+ installer version: $version"
 output "© 2021 lhridder"
 output ""
 output "Update machine and reboot? (yes/no)"
@@ -261,8 +287,7 @@ case $choice in
             output ""
             SERVER_IP=$(curl -s http://checkip.amazonaws.com)
             importssh
-            installpanel
-            installdaemon
+            choice
             ;;
         * ) output "You did not enter a valid selection."
             exit

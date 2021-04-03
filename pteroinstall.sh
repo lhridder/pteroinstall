@@ -224,7 +224,7 @@ server {
     service nginx restart
 }
 
-ssl {
+ssl() {
   output "Please enter the desired user email address:"
     read email
     # dns
@@ -248,7 +248,7 @@ ssl {
     certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
 }
 
-mysql {
+mysql() {
   output "###############################################################"
         output "MARIADB/MySQL INFORMATION"
         output ""
@@ -263,7 +263,7 @@ mysql {
         output ""
 }
 
-choices {
+choices() {
   output ""
   output "What do you want to install:"
   output "1: daemon & panel"

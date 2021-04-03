@@ -15,7 +15,44 @@ if [ "$key" != "" ]; then
 fi
 }
 
-install() {
+installdaemon() {
+    output "Installing docker"
+    curl -sSL https://get.docker.com/ | CHANNEL=stable bash
+    systemctl enable --now docker
+
+    output "Downloading daemon"
+    mkdir -p /etc/pterodactyl
+    curl -L -o /usr/local/bin/wings https://github.com/pterodactyl/wings/releases/latest/download/wings_linux_amd64
+    chmod u+x /usr/local/bin/wings
+
+    output "Add node on panel, server ip: $SERVER_IP"
+    read choice
+
+    output "Put daemon into systemd"
+    cat > /etc/systemd/system/wings.service <<- 'EOF'
+[Unit]
+Description=Pterodactyl Wings Daemon
+After=docker.service
+Requires=docker.service
+PartOf=docker.service
+
+[Service]
+User=root
+WorkingDirectory=/etc/pterodactyl
+LimitNOFILE=4096
+PIDFile=/var/run/wings/daemon.pid
+ExecStart=/usr/local/bin/wings
+Restart=on-failure
+StartLimitInterval=600
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl enable --now wings
+    output "Daemon install finished"
+}
+
+installpanel() {
 
 	# email
 	output "Please enter the desired user email address:"
@@ -35,22 +72,29 @@ install() {
     else 
         output "Domain resolved correctly. Good to go..."
     fi
+
 	# get apt repos
+    output "Getting apt repos"
 	apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg
 	LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
 	add-apt-repository -y ppa:chris-lea/redis-server
 	curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash
 	apt update
+
+    output "Installing panel dependencies"
 	# install panel dependencies
 	apt -y install php8.0 php8.0-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis-server certbot python3-certbot-nginx
 	# get composer
 	curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
-	# get panel files
+	
+    output "Downloading panel files"
 	mkdir -p /var/www/pterodactyl
 	cd /var/www/pterodactyl
 	curl -Lo panel.tar.gz https://github.com/pterodactyl/panel/releases/latest/download/panel.tar.gz
 	tar -xzvf panel.tar.gz
 	chmod -R 755 storage/* bootstrap/cache/
+
+    output "Installing composer"
 	cp .env.example .env
 	composer install --no-dev --optimize-autoloader
 
@@ -71,17 +115,18 @@ install() {
     SQL="${Q0}${Q1}${Q2}${Q3}${Q4}${Q5}${Q6}${Q7}${Q8}${Q9}"
     mysql -u root -e "$SQL"
 
+    output "Setting up mysql"
     sed -i -- 's/bind-address/# bind-address/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 	sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 	output 'Restarting MySQL process...'
 	service mysql restart
 
+    output "Creating users and setting up database"
 	php artisan key:generate --force
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=Europe/Amsterdam --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
 	php artisan p:environment:database --host=127.0.0.1 --port=3306 --database=panel --username=pterodactyl --password=$password
 	php artisan migrate --seed --force
 	php artisan p:user:make --email=$email --admin=1 --name-first="administrator" --name-last="admin"
-
 	mysql -e "INSERT INTO panel.locations VALUES(1, 'main', 'main', '2020-04-25 04:00:30', '2020-04-25 04:00:30')"
 
 	chown -R www-data:www-data /var/www/pterodactyl/*
@@ -102,15 +147,16 @@ ExecStart=/usr/bin/php /var/www/pterodactyl/artisan queue:work --queue=high,stan
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    output "Starting services..."
 	sudo systemctl daemon-reload
     systemctl enable pteroq.service
     systemctl start pteroq
     sudo systemctl enable --now redis-server
 
-output "Disabling default configuration..."
+    output "Disabling default configuration..."
     rm -rf /etc/nginx/sites-enabled/default
     output "Configuring Nginx Webserver..."
-    
     certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
 
 echo '
@@ -208,13 +254,15 @@ output "Update machine and reboot? (yes/no)"
 read choice
 case $choice in
 	yes ) output "You have selected to update the machine."
-            apt update && apt upgrade && reboot now
+            apt update && apt upgrade -y && reboot now
             output ""
             ;;
         no ) output "Continueing."
             output ""
+            SERVER_IP=$(curl -s http://checkip.amazonaws.com)
             importssh
-            install
+            installpanel
+            installdaemon
             ;;
         * ) output "You did not enter a valid selection."
             exit

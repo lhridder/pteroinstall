@@ -248,7 +248,22 @@ ssl {
     certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
 }
 
-choice {
+mysql {
+  output "###############################################################"
+        output "MARIADB/MySQL INFORMATION"
+        output ""
+        output "Your MariaDB/MySQL root password is $rootpassword"
+        output ""
+        output "Create your MariaDB/MySQL host with the following information:"
+        output "Host: $SERVER_IP"
+        output "Port: 3306"
+        output "User: admin"
+        output "Password: $adminpassword"
+        output "###############################################################"
+        output ""
+}
+
+choices {
   output ""
   output "What do you want to install:"
   output "1: daemon & panel"
@@ -259,6 +274,7 @@ choice {
               ssl
               installpanel
               installdaemon
+              mysql
               ;;
           2 ) output "You have selected to install daemon"
               ssl
@@ -287,7 +303,7 @@ case $choice in
             output ""
             SERVER_IP=$(curl -s http://checkip.amazonaws.com)
             importssh
-            choice
+            choices
             ;;
         * ) output "You did not enter a valid selection."
             exit

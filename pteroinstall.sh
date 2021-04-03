@@ -248,7 +248,7 @@ ssl() {
     certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
 }
 
-mysql() {
+mariadb() {
   output "###############################################################"
         output "MARIADB/MySQL INFORMATION"
         output ""
@@ -274,7 +274,7 @@ choices() {
               ssl
               installpanel
               installdaemon
-              mysql
+              mariadb
               ;;
           2 ) output "You have selected to install daemon"
               ssl

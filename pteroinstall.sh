@@ -49,7 +49,7 @@ StartLimitInterval=600
 [Install]
 WantedBy=multi-user.target
 EOF
-    systemctl enable --now wings
+    systemctl enable wings
     systemctl reset-failed wings
     systemctl start wings
     output "Daemon install finished"

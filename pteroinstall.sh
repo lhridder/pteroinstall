@@ -270,7 +270,7 @@ mariadb() {
 
 choices() {
   output ""
-  /tmp/nbashes "What do you want to install?" "Panel and Daemon" "Panel" "Cancel"
+  /tmp/nbashes "What do you want to install?" "Panel and Daemon" "Daemon" "Cancel"
   case $? in
   	  0 ) output "You have selected to install panel and daemon"
               ssl
@@ -278,7 +278,7 @@ choices() {
               installdaemon
               mariadb
               ;;
-          1 ) output "You have selected to install daemon"
+          1 ) output "You have selected to only install daemon"
               ssl
               output ""
               installdaemon

@@ -272,18 +272,18 @@ choices() {
   output ""
   /tmp/nbashes "What do you want to install?" "Panel and Daemon" "Panel" "Cancel"
   case $? in
-  	  1 ) output "You have selected to install panel and daemon"
+  	  0 ) output "You have selected to install panel and daemon"
               ssl
               installpanel
               installdaemon
               mariadb
               ;;
-          2 ) output "You have selected to install daemon"
+          1 ) output "You have selected to install daemon"
               ssl
               output ""
               installdaemon
               ;;
-          3 ) output "Installation cancelled."
+          2 ) output "Installation cancelled."
               exit 0
               ;;
           * ) output "You did not enter a valid selection."

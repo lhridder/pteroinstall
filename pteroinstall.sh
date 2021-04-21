@@ -270,12 +270,9 @@ mariadb() {
 
 choices() {
   output ""
-  output "What do you want to install:"
-  output "1: daemon & panel"
-  output "2: daemon"
-  read choice
-  case $choice in
-  	      1 ) output "You have selected to install panel and daemon"
+  /tmp/nbashes "What do you want to install?" "Panel and Daemon" "Panel" "Cancel"
+  case $? in
+  	  1 ) output "You have selected to install panel and daemon"
               ssl
               installpanel
               installdaemon
@@ -285,6 +282,9 @@ choices() {
               ssl
               output ""
               installdaemon
+              ;;
+          3 ) output "Installation cancelled."
+              exit 0
               ;;
           * ) output "You did not enter a valid selection."
               exit
@@ -303,19 +303,24 @@ echo "                                                       ";
 output "Ferox ptero 1.0+ installer version: $version"
 output "© 2021 lhridder"
 output ""
-output "Update machine and reboot? (yes/no)"
 
-read choice
-case $choice in
-	yes ) output "You have selected to update the machine."
+sleep 1
+wget -q -O /tmp/nbashes https://github.com/SnowpMakes/nbashes/releases/download/v1.0/nbashes-$(uname -i)
+chmod +x /tmp/nbashes
+/tmp/nbashes "Update machine and reboot before installing?" "Yes" "No" "Cancel"
+case $? in
+	0 ) output "You have selected to update the machine."
             apt update && apt upgrade -y && reboot now
             output ""
             ;;
-        no ) output "Continueing."
+        1 ) output "Continuing."
             output ""
             SERVER_IP=$(curl -s http://checkip.amazonaws.com)
             importssh
             choices
+            ;;
+        2 ) output "Installation cancelled."
+            exit 0
             ;;
         * ) output "You did not enter a valid selection."
             exit

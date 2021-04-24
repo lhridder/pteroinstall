@@ -305,7 +305,7 @@ output "© 2021 lhridder"
 output ""
 
 sleep 1
-wget -q -O /tmp/nbashes https://github.com/SnowpMakes/nbashes/releases/download/v1.0/nbashes-$(uname -i)
+wget -q -O /tmp/nbashes https://github.com/SnowpMakes/nbashes/releases/download/v1.0/nbashes-static-$(uname -i)
 chmod +x /tmp/nbashes
 /tmp/nbashes "Update machine and reboot before installing?" "Yes" "No" "Cancel"
 case $? in

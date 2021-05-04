@@ -248,7 +248,7 @@ ssl() {
         output "Domain resolved correctly. Good to go..."
     fi
 
-    apt install certbot python3-certbot-nginx
+    apt -y install certbot python3-certbot-nginx
     service nginx stop
     certbot certonly --standalone --email "$email" --agree-tos -d "$FQDN" --non-interactive
 }

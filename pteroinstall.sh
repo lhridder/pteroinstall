@@ -62,14 +62,14 @@ installpanel() {
 	apt -y install software-properties-common curl apt-transport-https ca-certificates gnupg
 	LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php
 	add-apt-repository -y ppa:chris-lea/redis-server
-	curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash
+	curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash
 	apt update
 
     output "Installing panel dependencies"
 	# install panel dependencies
 	apt -y install php8.0 php8.0-{cli,gd,mysql,pdo,mbstring,tokenizer,bcmath,xml,fpm,curl,zip} mariadb-server nginx tar unzip git redis-server fail2ban
 	# get composer
-	curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
+	curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
     output "Downloading panel files"
 	mkdir -p /var/www/pterodactyl
@@ -133,10 +133,9 @@ WantedBy=multi-user.target
 EOF
 
     output "Starting services..."
-	sudo systemctl daemon-reload
-    systemctl enable pteroq.service
-    systemctl start pteroq
-    sudo systemctl enable --now redis-server
+    systemctl daemon-reload
+    systemctl enable --now pteroq.service
+    systemctl enable --now redis-server
 
     output "Disabling default configuration..."
     rm -rf /etc/nginx/sites-enabled/default
@@ -302,7 +301,7 @@ echo "                                                       ";
 echo "                                                       ";
 output "Ferox ptero 1.0+ installer version: $version"
 output "© 2021 lhridder"
-output ""
+output "Script must be run on a clean Ubuntu 18.04/20.04 install under the root user"
 
 sleep 1
 wget -q -O /tmp/nbashes https://github.com/SnowpMakes/nbashes/releases/download/v1.0/nbashes-static-$(uname -i)

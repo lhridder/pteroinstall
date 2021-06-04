@@ -304,6 +304,8 @@ output "© 2021 lhridder"
 output "Script must be run on a clean Ubuntu 18.04/20.04 install under the root user"
 
 sleep 1
+importssh
+sleep 1
 wget -q -O /tmp/nbashes https://github.com/SnowpMakes/nbashes/releases/download/v1.0/nbashes-static-$(uname -i)
 chmod +x /tmp/nbashes
 /tmp/nbashes "Update machine and reboot before installing?" "Yes" "No" "Cancel"
@@ -315,7 +317,6 @@ case $? in
         1 ) output "Continuing."
             output ""
             SERVER_IP=$(curl -s http://checkip.amazonaws.com)
-            importssh
             choices
             ;;
         2 ) output "Installation cancelled."

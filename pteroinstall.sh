@@ -228,7 +228,8 @@ server {
 }
 
 ssl() {
-  output "Please enter the desired user email address:"
+    apt install -y dnsutils
+    output "Please enter the desired user email address:"
     read email
     # dns
     output "Please enter your FQDN (panel.domain.tld):"

@@ -80,6 +80,7 @@ installpanel() {
 
     output "Installing composer"
 	cp .env.example .env
+	export COMPOSER_ALLOW_SUPERUSER=1 # disable the warning for root users
 	composer install --no-dev --optimize-autoloader
 
 	output "Creating the databases and setting root password..."
@@ -110,6 +111,7 @@ installpanel() {
 	php artisan p:environment:setup -n --author=$email --url=https://$FQDN --timezone=Europe/Amsterdam --cache=redis --session=database --queue=redis --redis-host=127.0.0.1 --redis-pass= --redis-port=6379
 	php artisan p:environment:database --host=127.0.0.1 --port=3306 --database=panel --username=pterodactyl --password=$password
 	php artisan migrate --seed --force
+	echo -ne '\007' # Play bell sound to alert user that action is needed
 	php artisan p:user:make --email=$email --admin=1 --name-first="administrator" --name-last="admin"
 	mysql -e "INSERT INTO panel.locations VALUES(1, 'main', 'main', '2020-04-25 04:00:30', '2020-04-25 04:00:30')"
 

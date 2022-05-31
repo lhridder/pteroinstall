@@ -278,8 +278,8 @@ echo " |_|     \__\___|_|  \___/_____|_| |_|___/\__\__,_|_|_|";
 echo "                                                       ";
 echo "                                                       ";
 output "Ferox ptero 1.0+ installer version: $version"
-output "© 2021 lhridder"
-output "Script must be run on a clean Ubuntu 18.04/20.04 install under the root user"
+output "© 2022 lhridder"
+output "Script must be run on a clean Ubuntu 18.04/20.04/22.04 install under the root user"
 
 sleep 1
 importssh

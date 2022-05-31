@@ -145,30 +145,6 @@ EOF
 
 echo '
 server_tokens off;
-set_real_ip_from 103.21.244.0/22;
-set_real_ip_from 103.22.200.0/22;
-set_real_ip_from 103.31.4.0/22;
-set_real_ip_from 104.16.0.0/12;
-set_real_ip_from 104.16.0.0/13;
-set_real_ip_from 104.24.0.0/14;
-set_real_ip_from 108.162.192.0/18;
-set_real_ip_from 131.0.72.0/22;
-set_real_ip_from 141.101.64.0/18;
-set_real_ip_from 162.158.0.0/15;
-set_real_ip_from 172.64.0.0/13;
-set_real_ip_from 173.245.48.0/20;
-set_real_ip_from 188.114.96.0/20;
-set_real_ip_from 190.93.240.0/20;
-set_real_ip_from 197.234.240.0/22;
-set_real_ip_from 198.41.128.0/17;
-set_real_ip_from 2400:cb00::/32;
-set_real_ip_from 2606:4700::/32;
-set_real_ip_from 2803:f800::/32;
-set_real_ip_from 2405:b500::/32;
-set_real_ip_from 2405:8100::/32;
-set_real_ip_from 2c0f:f248::/32;
-set_real_ip_from 2a06:98c0::/29;
-real_ip_header X-Forwarded-For;
 server {
     listen 80 default_server;
     server_name '"$FQDN"';
@@ -189,8 +165,7 @@ server {
     ssl_certificate /etc/letsencrypt/live/'"$FQDN"'/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/'"$FQDN"'/privkey.pem;
     ssl_session_cache shared:SSL:10m;
-    ssl_protocols TLSv1.2;
-    ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256';
+    ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
     # See https://hstspreload.org/ before uncommenting the line below.
     # add_header Strict-Transport-Security "max-age=15768000; preload;";

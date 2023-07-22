@@ -64,7 +64,8 @@ installpanel() {
 	curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
 	echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
 
-	curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash
+	# Force the use of release candidate v11.1 to fix a regression in the 11.0 release. Everything after bash can be removed when 11.1 is a full release.
+	curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | bash  -s -- --mariadb-server-version="mariadb-11.1"
 	apt update
 
     output "Installing panel dependencies"

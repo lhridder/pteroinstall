@@ -86,6 +86,11 @@ installpanel() {
 	composer install --no-dev --optimize-autoloader
 
 	output "Creating the databases and setting root password..."
+ 
+    sed -i 's/utf8mb4=uca1400_ai_ci/utf8mb4_bin/g' /etc/mysql/mariadb.conf.d/50-server.cnf # Fix charset(0) error
+    service mysql restart
+    sleep 2 # Ensure mysql is back up
+    
     password=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     adminpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
     rootpassword=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1`
